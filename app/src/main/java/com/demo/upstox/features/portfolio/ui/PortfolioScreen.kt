@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,6 +26,7 @@ import com.demo.upstox.features.portfolio.ui.component.HoldingsList
 import com.demo.upstox.features.portfolio.ui.component.PortfolioSummarySheet
 import com.demo.upstox.features.portfolio.ui.component.StaleDataBanner
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioScreen(
     modifier: Modifier = Modifier,
@@ -40,11 +43,16 @@ fun PortfolioScreen(
         }
     )
 
-    PortfolioScreenContent(
-        state = uiState,
-        modifier = modifier,
-        onRefresh = viewModel::refresh
-    )
+    PullToRefreshBox(
+        isRefreshing = uiState is PortfolioUiState.Loading,
+        onRefresh = viewModel::refresh,
+        modifier = modifier
+    ) {
+        PortfolioScreenContent(
+            state = uiState,
+            onRefresh = viewModel::refresh
+        )
+    }
 }
 
 @Composable
@@ -73,7 +81,7 @@ private fun PortfolioScreenContent(
                         holdings = state.holdings,
                         modifier = Modifier
                             .fillMaxSize()
-                            .weight(1f)
+                            .weight(1f),
                     )
 
                     state.portfolioSummary?.let {
